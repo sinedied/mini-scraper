@@ -1,14 +1,14 @@
-import process from 'node:process';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import createDebug from 'debug';
 import { type Options } from '../options.js';
-import { resizeImageTo } from '../image.js';
+import { composeImageTo, resizeImageTo } from '../image.js';
 import { ArtType } from '../art.js';
-import { getMachine } from '../libretro.js';
+import { getArtTypes, getMachine } from '../libretro.js';
 
 const debug = createDebug('muos');
 
+const separateArtworks = false;
 const artworkBasePath = '/MUOS/info/catalogue/';
 // Maps machines to MUOS catalogue folders
 const machineFolders: Record<string, string | undefined> = {
@@ -81,10 +81,10 @@ const artFolders: Record<ArtType, string> = {
 let volumeRootPath: string | undefined;
 
 export async function useSeparateArtworks(_options: Options) {
-  return true;
+  return separateArtworks;
 }
 
-export async function getArtPath(filePath: string, machine: string, type?: ArtType) {
+export async function getArtPath(filePath: string, machine: string, type: ArtType = ArtType.Boxart) {
   const machineFolder = machineFolders[machine];
   if (!machineFolder) {
     throw new Error(`Machine "${machine}" not supported by MUOS`);
@@ -101,11 +101,23 @@ export async function getArtPath(filePath: string, machine: string, type?: ArtTy
 
 export async function exportArtwork(
   art1Url: string | undefined,
-  _art2Url: string | undefined,
+  art2Url: string | undefined,
   artPath: string,
   options: Options
 ) {
-  if (art1Url) {
+  if (separateArtworks) {
+    if (!art1Url) return false;
+
+    debug(`Found art URL: "${art1Url}"`);
+    await resizeImageTo(art1Url, artPath, { width: options.width, height: options.height });
+    return true;
+  }
+
+  const artTypes = getArtTypes(options);
+  if (artTypes.art2 && (art1Url ?? art2Url)) {
+    debug(`Found art URL(s): "${art1Url}" / "${art2Url}"`);
+    await composeImageTo(art1Url, art2Url, artPath, { width: options.width, height: options.height });
+  } else if (art1Url) {
     debug(`Found art URL: "${art1Url}"`);
     await resizeImageTo(art1Url, artPath, { width: options.width, height: options.height });
   } else {
