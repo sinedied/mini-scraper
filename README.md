@@ -19,7 +19,9 @@ Artwork scraper for [MinUI](https://github.com/shauninman/MinUI), [NextUI](https
 - Optionally uses local AI with [Ollama](https://ollama.com/) for better boxart matching
 - No configuration needed
 
-## Installation
+## Getting started
+
+### Running Locally
 
 Requires [Node.js](https://nodejs.org/), and optionally [Ollama](https://ollama.com/) for AI matching. You need to install these to be able to use the scraper.
 
@@ -31,18 +33,46 @@ Install the CLI globally by opening a terminal and running the following command
 npm install -g @sinedied/mini-scraper
 ```
 
-## Usage
-
 To run the scraper, open a terminal and use the following command:
 
 ```bash
 mscraper <rompath> [options]
 ```
 
-> [!TIP]
-> Max width must be adjusted depending of the device and output format, the default works well for Trimui Brick. For 640x480 devices, try with `--width 200`.
+Explanation:
 
-### Options
+- `<rompath>`: This is the path to the directory containing your ROMs.
+- `[options]`: Replace this with the command-line arguments to be passed to the scraper.
+
+### Running with Docker
+
+Using the Docker image is the easiest way to run the scraper without needing to install Node.js or Ollama.
+
+Firstly you will need to have Docker installed on your system. You can download and install Docker from the [official website](https://www.docker.com/).
+
+Once this is done build the Docker image by running the following command in the project directory:
+
+```bash
+docker build -t mini-scraper .
+```
+
+Then, you can run the scraper with the following command:
+
+```bash
+docker run --rm -v <rompath>:/roms mini-scraper /roms [options]
+```
+
+Explanation:
+
+- `--rm`: This removes the container after it has finished running.
+- `-v <rompath>:/roms`: This mounts your ROMs directory to the /roms directory inside the container.  Replace <rompath> with the actual path to your ROMs.
+- `mini-scraper`: This is the name of the Docker image.
+- `/roms`: This is the directory inside the container where the ROMs are mounted.
+- `[options]`: Replace this with the command-line arguments to be passed to the scraper.
+
+## Options
+
+When running the scraper, you can pass the following options:
 
 - `-w, --width <size>`: Max width of the image (default: 300)
 - `-h, --height <size>`: Max height of the image
@@ -55,6 +85,9 @@ mscraper <rompath> [options]
 - `--cleanup`: Removes all scraped images in target folder
 - `--verbose`: Show detailed logs
 - `-v, --version`: Show current version
+
+> [!TIP]
+> Max width must be adjusted depending of the device and output format, the default works well for Trimui Brick. For 640x480 devices, try with `--width 200`.
 
 ## Example
 
