@@ -3,9 +3,8 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import createDebug from 'debug';
 import glob from 'fast-glob';
-import stringComparison from "string-comparison";
 import { ArtTypeOption, type Options } from './options.js';
-import { findBestMatch } from './matcher.js';
+import { findBestMatch, findFuzzyMatches } from './matcher.js';
 import { stats } from './stats.js';
 import { machines } from './machines.js';
 import { getOutputFormat } from './format/format.js';
@@ -154,46 +153,21 @@ export async function findArtUrl(
     return undefined;
   };
 
-  const findFuzzyMatch = async (name: string) => {
-    const strippedArts = arts.map((a) => a.replaceAll(/(\(.*?\)|\[.*?])/g, '').trim());
-    const cosineMatches = strippedArts
-      .map((a) => ({ art: a, similarity: stringComparison.cosine.similarity(santizeName(name), a) }))
-      .filter(({ similarity }) => similarity >= 0.80)
-      .sort((a, b) => b.similarity - a.similarity)
-      .slice(0, 25)
-      .map(({ art }) => art);
-    const jaroMatches = strippedArts
-      .map((a) => ({ art: a, similarity: stringComparison.jaroWinkler.similarity(santizeName(name), a) }))
-      .filter(({ similarity }) => similarity >= 0.75)
-      .sort((a, b) => b.similarity - a.similarity)
-      .slice(0, 25)
-      .map(({ art }) => art);
-      const matches: string[] = [];
-      strippedArts.forEach((strippedArt, index) => {
-        if (cosineMatches.includes(strippedArt) || jaroMatches.includes(strippedArt)) {
-          matches.push(arts[index]);
-        }
-      });
-    if (matches.length > 0) {
-      const bestMatch = await findBestMatch(name, fileName, matches, options);
-      return `${baseUrl}${machine}/${type}/${bestMatch}`;
-    }
-
-    return undefined;
-  };
-
   // Try searching after removing (...) and [...] in the name
   let strippedName = fileName.replaceAll(/(\(.*?\)|\[.*?])/g, '').trim();
   let match = await findMatch(strippedName);
   if (match) return match;
 
+  // Try searching using fuzzy matching
+  const matches: string[] = await findFuzzyMatches(santizeName(strippedName), arts, options);
+  if (matches.length > 0) {
+    const bestMatch = await findBestMatch(strippedName, fileName, matches, options);
+    return `${baseUrl}${machine}/${type}/${bestMatch}`;
+  }
+
   // Try searching after removing DX in the name
   strippedName = strippedName.replaceAll('DX', '').trim();
   match = await findMatch(strippedName);
-  if (match) return match;
-
-  // Try searching using findFuzzyMatch
-  match = await findFuzzyMatch(strippedName);
   if (match) return match;
 
   // Try searching after removing substitles using ': '

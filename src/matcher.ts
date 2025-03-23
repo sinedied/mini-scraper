@@ -1,4 +1,5 @@
 import { closest } from 'fastest-levenshtein';
+import stringComparison from 'string-comparison';
 import createDebug from 'debug';
 import { type Options } from './options.js';
 import { getCompletion } from './ollama.js';
@@ -70,4 +71,27 @@ Answer with JSON using the following format:
   console.info(`AI match for "${name}" (searched: "${search}"): "${bestMatch}"`);
   stats.matches.ai++;
   return bestMatch;
+}
+
+export async function findFuzzyMatches(search: string, candidates: string[], _options: Options) {
+  // Remove (...) and [...] in candidates' name
+  const strippedCandidates = candidates.map((c) => c.replaceAll(/(\(.*?\)|\[.*?])/g, '').trim());
+  const jaroMatches = new Set(
+    strippedCandidates
+      .map((c) => ({ c, similarity: stringComparison.jaroWinkler.similarity(search, c) }))
+      .filter(({ similarity }) => similarity >= 0.85)
+      .sort((a, b) => b.similarity - a.similarity)
+      .slice(0, 25)
+      .map(({ c }) => c)
+  );
+  const matches: string[] = [];
+  for (const [index, strippedCandidate] of strippedCandidates.entries()) {
+    if (jaroMatches.has(strippedCandidate)) {
+      matches.push(candidates[index]);
+    }
+  }
+
+  debug(`Fuzzy matches for "${search}":`, matches);
+
+  return matches;
 }
