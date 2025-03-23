@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import createDebug from 'debug';
 import glob from 'fast-glob';
 import { ArtTypeOption, type Options } from './options.js';
-import { findBestMatch } from './matcher.js';
+import { findBestMatch, findFuzzyMatches } from './matcher.js';
 import { stats } from './stats.js';
 import { machines } from './machines.js';
 import { getOutputFormat } from './format/format.js';
@@ -157,6 +157,13 @@ export async function findArtUrl(
   let strippedName = fileName.replaceAll(/(\(.*?\)|\[.*?])/g, '').trim();
   let match = await findMatch(strippedName);
   if (match) return match;
+
+  // Try searching using fuzzy matching
+  const matches: string[] = await findFuzzyMatches(santizeName(strippedName), arts, options);
+  if (matches.length > 0) {
+    const bestMatch = await findBestMatch(strippedName, fileName, matches, options);
+    return `${baseUrl}${machine}/${type}/${bestMatch}`;
+  }
 
   // Try searching after removing DX in the name
   strippedName = strippedName.replaceAll('DX', '').trim();
