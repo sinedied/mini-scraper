@@ -196,8 +196,13 @@ export async function findArtUrl(
   match = await findFuzzyMatch(strippedName);
   if (match) return match;
 
-  // Try searching after removing substitles in the name
-  strippedName = strippedName.split(' - ')[0].trim();
+  // Try searching after removing substitles using ': '
+  strippedName = strippedName.split(': ')[0].trim();
+  match = await findMatch(strippedName);
+  if (match) return match;
+
+  // Try searching after removing substitles using '- '
+  strippedName = strippedName.split('- ')[0].trim();
   match = await findMatch(strippedName);
   if (match) return match;
 
@@ -219,7 +224,7 @@ export async function findArtUrl(
 }
 
 export function santizeName(name: string) {
-  return name.replaceAll(/[&*/:`<>?|"]/g, '_');
+  return name.replaceAll(/^\d+\)\s*/g, '').replaceAll(/[&*/:`<>?|"]/g, '_');
 }
 
 export function getArtTypes(options: Options) {
