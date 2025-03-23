@@ -41,6 +41,7 @@ ${candidates.map((c) => `${c}`).join('\n')}
 Find the best matching image for the ROM name "${name}" in the listed candidates.
 If a direct match isn't available, use the closest match trying to translate the name in english.
 For example, "Pokemon - Version Or (France) (SGB Enhanced)" should match "Pokemon - Gold Version (USA, Europe) (SGB Enhanced) (GB Compatible).png".
+Game sequels MUST NOT match, "Sonic" is NOT the same as "Sonic 2".
 When multiple regions are available, prefer the one that matches the region of the ROM if possible.
 If the region is not available, use this order of preference: ${options.regions}.
 If no close match is found, return null.
