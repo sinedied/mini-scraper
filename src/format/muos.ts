@@ -5,6 +5,7 @@ import { type Options } from '../options.js';
 import { composeImageTo, resizeImageTo } from '../image.js';
 import { ArtType } from '../art.js';
 import { getArtTypes, getMachine } from '../libretro.js';
+import { pathExists } from '../file.js';
 
 const debug = createDebug('muos');
 
@@ -78,7 +79,9 @@ const artFolders: Record<ArtType, string> = {
   [ArtType.Snap]: 'preview',
   [ArtType.Title]: 'preview'
 };
+const iniFiles = ['theme/override/muxfavourite.txt', 'theme/override/muxhistory.txt', 'theme/override/muxplore.txt'];
 let volumeRootPath: string | undefined;
+let hasUpdatedIni = false;
 
 export async function useSeparateArtworks(_options: Options) {
   return separateArtworks;
@@ -146,6 +149,11 @@ export async function cleanupArtwork(targetPath: string, romFolders: string[], _
   console.info(`Removed ${removed} folders`);
 }
 
+export async function prepareMachine(folderPath: string, _machine: string, options: Options) {
+  const root = await findVolumeRoot(folderPath);
+  await updateIniFiles(root, options);
+}
+
 async function findVolumeRoot(targetPath: string) {
   if (volumeRootPath) {
     return volumeRootPath;
@@ -171,9 +179,44 @@ async function findVolumeRoot(targetPath: string) {
   return volumeRootPath;
 }
 
+async function updateIniFiles(rootPath: string, options: Options) {
+  // Only do it once per run
+  if (hasUpdatedIni) return;
+  hasUpdatedIni = true;
+
+  const iniFilesToUpdate = iniFiles.map((file) => path.join(rootPath, file));
+  for (const iniFile of iniFilesToUpdate) {
+    try {
+      await fs.mkdir(path.dirname(iniFile), { recursive: true });
+
+      if (await pathExists(iniFile)) {
+        let content = await fs.readFile(iniFile, 'utf8');
+        if (content.includes('CONTENT_WIDTH')) {
+          content = content.replace(/^CONTENT_WIDTH=\d+$/m, `CONTENT_WIDTH=${options.width}`);
+          console.info(`Updated theme override: "${iniFile}" with CONTENT_WIDTH=${options.width}`);
+          await fs.writeFile(iniFile, content);
+        } else {
+          console.info(`Theme override file "${iniFile}" exists, but CONTENT_WIDTH not set, skipping update`);
+        }
+
+        continue;
+      }
+
+      // Create the file if it doesn't exist
+      const content = `[misc]\nCONTENT_WIDTH=${options.width}\n`;
+      await fs.writeFile(iniFile, content);
+      console.info(`Created theme override: "${iniFile}"`);
+    } catch (_error) {
+      const error = _error as Error;
+      console.error(`Failed to update theme override file "${iniFile}": ${error?.message}`);
+    }
+  }
+}
+
 const muos = {
   useSeparateArtworks,
   getArtPath,
+  prepareMachine,
   exportArtwork,
   cleanupArtwork
 };

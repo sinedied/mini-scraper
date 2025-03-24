@@ -10,6 +10,8 @@ export enum Format {
 
 export type SeparateArtworksFunction = (options: Options) => Promise<boolean>;
 
+export type PrepareMachineFunction = (folderPath: string, machine: string, options: Options) => Promise<void>;
+
 export type OutputPathFunction = (filePath: string, machine: string, type?: ArtType) => Promise<string>;
 
 export type OutputArtworkFunction = (
@@ -23,6 +25,7 @@ export type CleanupArtworkFunction = (targetPath: string, romFolders: string[], 
 
 export type OutputFormat = {
   useSeparateArtworks: SeparateArtworksFunction;
+  prepareMachine?: PrepareMachineFunction;
   getArtPath: OutputPathFunction;
   exportArtwork: OutputArtworkFunction;
   cleanupArtwork: CleanupArtworkFunction;

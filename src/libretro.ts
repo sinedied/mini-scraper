@@ -34,6 +34,7 @@ export async function scrapeFolder(folderPath: string, options: Options) {
   debug('Options:', options);
   console.info(`Scraping folder: ${folderPath} [Detected: ${getMachine(folderPath, true)}]`);
   const files = await glob(['**/*'], { onlyFiles: true, cwd: folderPath });
+  let prepared = false;
 
   for (const file of files) {
     try {
@@ -56,6 +57,10 @@ export async function scrapeFolder(folderPath: string, options: Options) {
       if (!machine) continue;
 
       const format = await getOutputFormat(options);
+      if (format.prepareMachine && !prepared) {
+        await format.prepareMachine(folderPath, machine, options);
+        prepared = true;
+      }
 
       if (await format.useSeparateArtworks(options)) {
         const artTypes = getArtTypes(options);
