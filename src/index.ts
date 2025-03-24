@@ -1,5 +1,6 @@
 export * from './art.js';
 export * from './cli.js';
+export * from './file.js';
 export * from './image.js';
 export * from './libretro.js';
 export * from './machines.js';

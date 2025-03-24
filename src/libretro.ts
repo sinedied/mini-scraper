@@ -1,6 +1,5 @@
 import process from 'node:process';
 import path from 'node:path';
-import fs from 'node:fs/promises';
 import createDebug from 'debug';
 import glob from 'fast-glob';
 import { ArtTypeOption, type Options } from './options.js';
@@ -9,6 +8,7 @@ import { stats } from './stats.js';
 import { machines } from './machines.js';
 import { getOutputFormat } from './format/format.js';
 import { ArtType } from './art.js';
+import { pathExists, sanitizeName } from './file.js';
 
 const debug = createDebug('libretro');
 
@@ -136,7 +136,7 @@ export async function findArtUrl(
   const fileName = path.basename(filePath, path.extname(filePath));
 
   // Try exact match
-  const pngName = santizeName(`${fileName}.png`);
+  const pngName = sanitizeName(`${fileName}.png`);
   if (arts.includes(pngName)) {
     debug(`Found exact match for "${fileName}"`);
     stats.matches.perfect++;
@@ -144,7 +144,7 @@ export async function findArtUrl(
   }
 
   const findMatch = async (name: string) => {
-    const matches = arts.filter((a) => a.includes(santizeName(name)));
+    const matches = arts.filter((a) => a.includes(sanitizeName(name)));
     if (matches.length > 0) {
       const bestMatch = await findBestMatch(name, fileName, matches, options);
       return `${baseUrl}${machine}/${type}/${bestMatch}`;
@@ -159,7 +159,7 @@ export async function findArtUrl(
   if (match) return match;
 
   // Try searching using fuzzy matching
-  const matches: string[] = await findFuzzyMatches(santizeName(strippedName), arts, options);
+  const matches: string[] = await findFuzzyMatches(sanitizeName(strippedName), arts, options);
   if (matches.length > 0) {
     const bestMatch = await findBestMatch(strippedName, fileName, matches, options);
     return `${baseUrl}${machine}/${type}/${bestMatch}`;
@@ -197,10 +197,6 @@ export async function findArtUrl(
   return undefined;
 }
 
-export function santizeName(name: string) {
-  return name.replaceAll(/^\d+\)\s*/g, '').replaceAll(/[&*/:`<>?|"]/g, '_');
-}
-
 export function getArtTypes(options: Options) {
   switch (options.type) {
     case ArtTypeOption.Boxart: {
@@ -228,14 +224,5 @@ export function getArtTypes(options: Options) {
       console.error(`Invalid art type: "${options.type as any}"`);
       process.exit(1);
     }
-  }
-}
-
-export async function pathExists(targetPath: string) {
-  try {
-    await fs.access(targetPath);
-    return true;
-  } catch {
-    return false;
   }
 }
