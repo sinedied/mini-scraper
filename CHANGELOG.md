@@ -1,3 +1,20 @@
+# [1.5.0](https://github.com/sinedied/mini-scraper/compare/1.4.1...1.5.0) (2025-03-29)
+
+
+### Bug Fixes
+
+* improve subtitle handling in matching logic ([#8](https://github.com/sinedied/mini-scraper/issues/8)) ([8f72ea4](https://github.com/sinedied/mini-scraper/commit/8f72ea4efeb55e95fb933ba84446de09f793af9d))
+
+
+### Features
+
+* add Docker support ([#6](https://github.com/sinedied/mini-scraper/issues/6)) ([e320e85](https://github.com/sinedied/mini-scraper/commit/e320e85771e9105c332e5a8226e62cef13023edc))
+* add fuzzy matching ([#9](https://github.com/sinedied/mini-scraper/issues/9)) ([#10](https://github.com/sinedied/mini-scraper/issues/10)) ([5d355f4](https://github.com/sinedied/mini-scraper/commit/5d355f427e7cad4e25cbc2b00b7cc4f2fb6e20ba))
+* disable separate artwork scraping for muOS ([0d76062](https://github.com/sinedied/mini-scraper/commit/0d76062ae716fae07f2a579280d1d434ad707a6d))
+* generate/update theme overrides for muOS ([7a178bb](https://github.com/sinedied/mini-scraper/commit/7a178bb7d67f2cb3f484c827965d29f7ac9fc23b))
+* ignore "XX)" ordering before the rom name ([#7](https://github.com/sinedied/mini-scraper/issues/7)) ([a498452](https://github.com/sinedied/mini-scraper/commit/a498452ac52d2d4d441a50be284d1a4d0cc0882f))
+* improve ai matching ([0ff04d3](https://github.com/sinedied/mini-scraper/commit/0ff04d3f5b8c573a7e97c3108416dbc559377fca))
+
 ## [1.4.1](https://github.com/sinedied/mini-scraper/compare/1.4.0...1.4.1) (2025-03-16)
 
 
