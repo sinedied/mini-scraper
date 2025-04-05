@@ -37,10 +37,6 @@ export const machines: Record<string, Machine> = {
     extensions: ['fds', 'zip'],
     alias: ['FDS', 'Family Computer Disk System', 'Famicom Disk System']
   },
-  'Nintendo - Nintendo Entertainment System': {
-    extensions: ['nes', 'zip'],
-    alias: ['NES', 'FC', 'Famicom', 'Nintendo']
-  },
   'Nintendo - Nintendo DSi': {
     extensions: ['dsi', 'zip'],
     alias: ['DSi', 'Nintendo DSi'],
@@ -49,6 +45,10 @@ export const machines: Record<string, Machine> = {
   'Nintendo - Nintendo DS': {
     extensions: ['nds', 'zip'],
     alias: ['DS', 'Nintendo DS']
+  },
+  'Nintendo - Nintendo Entertainment System': {
+    extensions: ['nes', 'zip'],
+    alias: ['NES', 'FC', 'Famicom', 'Nintendo']
   },
   'Nintendo - Pokemon Mini': {
     extensions: ['pm', 'min', 'zip'],
