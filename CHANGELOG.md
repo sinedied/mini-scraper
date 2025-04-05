@@ -1,3 +1,12 @@
+## [1.5.1](https://github.com/sinedied/mini-scraper/compare/1.5.0...1.5.1) (2025-04-05)
+
+
+### Bug Fixes
+
+* check if multi-disk m3u file is already in machine dir ([c3449a0](https://github.com/sinedied/mini-scraper/commit/c3449a00887db0fef951499645870849fd19b5c4))
+* encode URIs in `loadImage` ([d2b1267](https://github.com/sinedied/mini-scraper/commit/d2b12679d4815e2a29c74e84baf4b336537c54dd))
+* move NES after DS, since it has the shorter alias ([9827f3e](https://github.com/sinedied/mini-scraper/commit/9827f3e33e2f776cffb03d70529f07791e530db9))
+
 # [1.5.0](https://github.com/sinedied/mini-scraper/compare/1.4.1...1.5.0) (2025-03-29)
 
 
