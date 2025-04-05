@@ -41,8 +41,13 @@ export async function scrapeFolder(folderPath: string, options: Options) {
       const originalFilePath = path.join(folderPath, file);
       let filePath = originalFilePath;
       if (filePath.endsWith('.m3u')) {
-        filePath = path.dirname(filePath);
-        debug(`File is m3u, using parent folder for scraping: ${filePath}`);
+        const parentFolder = path.dirname(filePath);
+        if (parentFolder === folderPath) {
+          debug(`File is m3u, parent folder is machine folder, continuing anyway: ${filePath}`);
+        } else {
+          filePath = parentFolder;
+          debug(`File is m3u, using parent folder for scraping: ${filePath}`);
+        }
       } else {
         // Check if it's a multi-disc, with "Rom Name (Disc 1).any" format,
         // with a "Rom Name.m3u" in the same folder
