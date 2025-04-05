@@ -12,6 +12,7 @@ export type Size = {
 };
 
 export async function loadImage(url: string) {
+  url = encodeURI(url);
   try {
     return await Jimp.read(url);
   } catch (error_: unknown) {
