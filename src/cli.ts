@@ -31,7 +31,7 @@ export async function run(args: string[] = process.argv) {
     .option('-w, --width <size>', 'Max width of the image', Number.parseFloat, 300)
     .option('-h, --height <size>', 'Max height of the image', Number.parseFloat)
     .option('-t, --type <type>', 'Art type (boxart, snap, title, box+snap, box+title)', 'boxart')
-    .option('-o, --output <format>', 'Artwork format (minui, nextui, muos, anbernic)', 'minui')
+    .option('-o, --output <format>', 'Artwork format (minui, nextui, muos, anbernic, onion)', 'minui')
     .option('-a, --ai', 'Use AI for advanced matching', false)
     .option('-m, --ai-model <name>', 'Ollama model to use for AI matching', 'gemma2:2b')
     .option('-r, --regions <regions>', 'Preferred regions to use for AI matching', 'World,Europe,USA,Japan')

@@ -13,3 +13,4 @@ export * as minui from './format/minui.js';
 export * as nextui from './format/nextui.js';
 export * as muos from './format/muos.js';
 export * as anbernic from './format/anbernic.js';
+export * as onion from './format/onion.js';
