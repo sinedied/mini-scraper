@@ -6,7 +6,8 @@ export enum Format {
   NextUI = 'nextui',
   MuOS = 'muos',
   Anbernic = 'anbernic',
-  Funkey = 'funkey'
+  Funkey = 'funkey',
+  Onion = 'onion'
 }
 
 export type SeparateArtworksFunction = (options: Options) => Promise<boolean>;
@@ -57,6 +58,11 @@ export async function getOutputFormat(options: Options): Promise<OutputFormat> {
     case Format.Funkey: {
       const funkey = await import('./funkey.js');
       return funkey.default;
+    }
+
+    case Format.Onion: {
+      const onion = await import('./onion.js');
+      return onion.default;
     }
 
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
