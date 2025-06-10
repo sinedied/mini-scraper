@@ -5,7 +5,8 @@ export enum Format {
   MinUI = 'minui',
   NextUI = 'nextui',
   MuOS = 'muos',
-  Anbernic = 'anbernic'
+  Anbernic = 'anbernic',
+  Onion = 'onion'
 }
 
 export type SeparateArtworksFunction = (options: Options) => Promise<boolean>;
@@ -51,6 +52,11 @@ export async function getOutputFormat(options: Options): Promise<OutputFormat> {
     case Format.Anbernic: {
       const anbernic = await import('./anbernic.js');
       return anbernic.default;
+    }
+
+    case Format.Onion: {
+      const onion = await import('./onion.js');
+      return onion.default;
     }
 
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check

@@ -8,7 +8,7 @@
 
 <img src="https://raw.githubusercontent.com/sinedied/mini-scraper/refs/heads/main/pic.jpg" alt="picture of a scraped boxart" width="180" align="right">
 
-Artwork scraper for [MinUI](https://github.com/shauninman/MinUI), [NextUI](https://github.com/LoveRetro/NextUI) and [muOS](https://muos.dev/).
+Artwork scraper for [MinUI](https://github.com/shauninman/MinUI), [NextUI](https://github.com/LoveRetro/NextUI), [muOS](https://muos.dev/), and [Onion](https://onionui.github.io/).
 
 > [!NOTE]
 > MinUI does't officially support boxarts, but still has [some support for it as stated by its author](https://www.reddit.com/r/SBCGaming/comments/1hycyqx/minui_box_art/).
@@ -48,7 +48,7 @@ When running the scraper, you can pass the following options:
 - `-w, --width <size>`: Max width of the image (default: 300)
 - `-h, --height <size>`: Max height of the image
 - `-t, --type <type>`: Type of image to scrape (can be `boxart`, `snap`, `title`, `box+snap`, `box+title`) (default: `boxart`)
-- `-o, --output <format>`: Artwork format (can be (`minui`, `nextui`, `muos`, `anbernic`) (default: `minui`)
+- `-o, --output <format>`: Artwork format (can be (`minui`, `nextui`, `muos`, `anbernic`, `onion`) (default: `minui`)
 - `-a, --ai`: Use AI for advanced matching (default: false)
 - `-m, --ai-model <name>`: Ollama model to use for AI matching (default: `gemma2:2b`)
 - `-r, --regions <regions>`: Preferred regions to use for AI matching (default: `World,Europe,USA,Japan`)
