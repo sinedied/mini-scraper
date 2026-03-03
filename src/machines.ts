@@ -30,7 +30,7 @@ export const machines: Record<string, Machine> = {
     fallbacks: ['Nintendo - Nintendo 64']
   },
   'Nintendo - Nintendo 64': {
-    extensions: ['n64', 'v64', 'zip'],
+    extensions: ['n64', 'v64', 'z64', 'zip'],
     alias: ['N64', 'Nintendo 64']
   },
   'Nintendo - Family Computer Disk System': {
