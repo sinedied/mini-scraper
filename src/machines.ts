@@ -117,10 +117,6 @@ export const machines: Record<string, Machine> = {
     extensions: ['st', 'zip'],
     alias: ['ST', 'ATARIST', 'Atari ST']
   },
-  'Atari - 2600': {
-    extensions: ['a26', 'zip'],
-    alias: ['A26', '2600', 'Atari 2600', 'Atari']
-  },
   'Atari - 5200': {
     extensions: ['a52', 'zip'],
     alias: ['A52', '5200', 'Atari 5200']
@@ -136,6 +132,10 @@ export const machines: Record<string, Machine> = {
   'Atari - Lynx': {
     extensions: ['lynx', 'zip'],
     alias: ['LYNX', 'Lynx']
+  },
+  'Atari - 2600': {
+    extensions: ['a26', 'zip'],
+    alias: ['A26', '2600', 'Atari 2600', 'Atari']
   },
   'Bandai - WonderSwan Color': {
     extensions: ['wsc', 'zip'],
