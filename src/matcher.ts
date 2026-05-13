@@ -2,8 +2,8 @@ import { closest } from 'fastest-levenshtein';
 import stringComparison from 'string-comparison';
 import createDebug from 'debug';
 import { type Options } from './options.js';
-import { OllamaProvider } from './ai.js';
 import { stats } from './stats.js';
+import { OllamaProvider } from './ai/ollama.js';
 
 const debug = createDebug('matcher');
 
@@ -80,7 +80,10 @@ export async function findFuzzyMatches(search: string, candidates: string[], _op
   const strippedCandidates = candidates.map((c) => c.replaceAll(/(\(.*?\)|\[.*?])/g, '').trim());
   const jaroMatches = new Set(
     strippedCandidates
-      .map((c) => ({ c, similarity: stringComparison.jaroWinkler.similarity(search, c) }))
+      .map((c) => ({
+        c,
+        similarity: stringComparison.jaroWinkler.similarity(search, c)
+      }))
       .filter(({ similarity }) => similarity >= 0.85)
       .sort((a, b) => b.similarity - a.similarity)
       .slice(0, 25)
