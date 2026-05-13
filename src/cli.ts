@@ -2,17 +2,19 @@ import process from 'node:process';
 import fs from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { join, dirname, basename } from 'node:path';
-import { program } from 'commander';
+import { program, Option } from 'commander';
 import debug from 'debug';
 import glob from 'fast-glob';
 import updateNotifier from 'update-notifier';
 import { isRomFolder, scrapeFolder } from './libretro.js';
 import { type Options } from './options.js';
-import { checkOllama } from './ollama.js';
+import { detectProvider, type AiProviderName } from './ai.js';
 import { stats } from './stats.js';
 import { getOutputFormat } from './format/format.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+type CliFlags = Omit<Options, 'aiProvider'> & { aiProvider?: AiProviderName };
 
 export async function run(args: string[] = process.argv) {
   const file = await fs.readFile(join(__dirname, '..', 'package.json'), 'utf8');
@@ -33,7 +35,11 @@ export async function run(args: string[] = process.argv) {
     .option('-t, --type <type>', 'Art type (boxart, snap, title, box+snap, box+title)', 'boxart')
     .option('-o, --output <format>', 'Artwork format (minui, nextui, muos, anbernic)', 'minui')
     .option('-a, --ai', 'Use AI for advanced matching', false)
-    .option('-m, --ai-model <name>', 'Ollama model to use for AI matching', 'gemma2:2b')
+    .option('-m, --ai-model <name>', 'AI model to use for matching (Ollama or LM Studio)', 'gemma2:2b')
+    .addOption(
+      new Option('--ai-provider <name>', 'Force AI provider; autodetected by default').choices(['ollama', 'lmstudio'])
+    )
+    .option('--ai-url <url>', 'Override base URL for the AI provider')
     .option('-r, --regions <regions>', 'Preferred regions to use for AI matching', 'World,Europe,USA,Japan')
     .option('-f, --force', 'Force scraping over existing images')
     .option('--cleanup', 'Removes all scraped images in target folder')
@@ -41,7 +47,9 @@ export async function run(args: string[] = process.argv) {
     .version(packageJson.version, '-v, --version', 'Show current version')
     .helpCommand(false)
     .allowExcessArguments(false)
-    .action(async (targetPath: string, options: Options) => {
+    .action(async (targetPath: string, rawOptions: CliFlags) => {
+      const { aiProvider: forcedProvider, ...rest } = rawOptions;
+      const options = rest as Options;
       stats.startTime = Date.now();
       process.chdir(targetPath);
 
@@ -72,11 +80,17 @@ export async function run(args: string[] = process.argv) {
       }
 
       if (options.ai) {
-        const ollama = await checkOllama(options.aiModel);
-        if (!ollama) {
+        const provider = await detectProvider({
+          model: options.aiModel,
+          forcedProvider,
+          url: options.aiUrl
+        });
+        if (!provider) {
           process.exitCode = 1;
           return;
         }
+
+        options.aiProvider = provider;
       }
 
       for (const folder of romFolders) {

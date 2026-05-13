@@ -2,7 +2,7 @@ import { closest } from 'fastest-levenshtein';
 import stringComparison from 'string-comparison';
 import createDebug from 'debug';
 import { type Options } from './options.js';
-import { getCompletion } from './ollama.js';
+import { OllamaProvider } from './ai.js';
 import { stats } from './stats.js';
 
 const debug = createDebug('matcher');
@@ -52,7 +52,8 @@ Answer with JSON using the following format:
   "bestMatch": "<best matching candidate>"
 }`;
 
-  const response = await getCompletion(prompt, options.aiModel);
+  const provider = options.aiProvider ?? new OllamaProvider();
+  const response = await provider.getCompletion(prompt, options.aiModel);
   debug('AI response:', response);
 
   const bestMatch = response?.bestMatch;
