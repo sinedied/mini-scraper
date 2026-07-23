@@ -3,7 +3,7 @@ import stringComparison from 'string-comparison';
 import createDebug from 'debug';
 import { type Options } from './options.js';
 import { stats } from './stats.js';
-import { OllamaProvider } from './ai/ollama.js';
+import { getCompletion } from './ai.js';
 
 const debug = createDebug('matcher');
 
@@ -52,8 +52,9 @@ Answer with JSON using the following format:
   "bestMatch": "<best matching candidate>"
 }`;
 
-  const provider = options.aiProvider ?? new OllamaProvider();
-  const response = await provider.getCompletion(prompt, options.aiModel);
+  if (!options.aiClient) return undefined;
+
+  const response = await getCompletion(options.aiClient, prompt, options.aiModel);
   debug('AI response:', response);
 
   const bestMatch = response?.bestMatch;

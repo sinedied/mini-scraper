@@ -1,4 +1,4 @@
-import { type AiProvider } from './ai.js';
+import type OpenAI from 'openai';
 
 export enum ArtTypeOption {
   Boxart = 'boxart',
@@ -15,8 +15,9 @@ export type Options = {
   force?: boolean;
   ai?: boolean;
   aiModel: string;
-  aiProvider?: AiProvider;
-  aiUrl?: string;
+  aiUrl: string;
+  aiKey?: string;
+  aiClient?: OpenAI;
   regions: string;
   output: string;
   cleanup?: boolean;

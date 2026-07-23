@@ -2,143 +2,117 @@ import process from 'node:process';
 import { execSync } from 'node:child_process';
 import { createInterface } from 'node:readline';
 import createDebug from 'debug';
-import { DEFAULT_LMSTUDIO_URL, LmStudioProvider, probeLmStudio } from './ai/lmstudio.js';
-import { DEFAULT_OLLAMA_URL, OllamaProvider, probeOllama } from './ai/ollama.js';
+import OpenAI from 'openai';
 
-const debugDetect = createDebug('ai:detect');
+const debug = createDebug('ai');
 
-export type AiProviderName = 'ollama' | 'lmstudio';
-
-export const PROBE_TIMEOUT_MS = 500;
+// Default to Ollama's OpenAI-compatible endpoint, so it works out of the box like before.
+export const DEFAULT_AI_URL = 'http://localhost:11434/v1';
+// Placeholder key for local providers that don't require authentication (Ollama, LM Studio…).
+export const DEFAULT_AI_KEY = 'ollama';
 
 export type AiCompletion = Record<string, string | undefined> | undefined;
 
-export type AiProvider = {
-  name: AiProviderName;
-  baseUrl: string;
-  check(model: string): Promise<boolean>;
-  hasModel(model: string): Promise<boolean>;
-  getCompletion(prompt: string, model: string, retryCount?: number): Promise<AiCompletion>;
-};
-
-export type Probe = {
-  up: boolean;
-  hasModel: boolean;
-};
-
-export type DetectInput = {
+export type AiConfig = {
+  url: string;
+  apiKey: string;
   model: string;
-  forcedProvider?: AiProviderName;
-  url?: string;
 };
 
-const detectOllamaOrLmStudio = async (
-  url: string,
+export function createAiClient(config: AiConfig): OpenAI {
+  return new OpenAI({ baseURL: config.url, apiKey: config.apiKey });
+}
+
+export async function getCompletion(
+  client: OpenAI,
+  prompt: string,
   model: string,
-  forcedProvider: AiProviderName
-): Promise<AiProvider | undefined> => {
-  if (forcedProvider === 'ollama') {
-    const provider = new OllamaProvider(url ?? DEFAULT_OLLAMA_URL);
-    console.info(`Using AI provider: ollama (${provider.baseUrl})`);
-    const ok = await provider.check(model);
-    return ok ? provider : undefined;
+  retryCount = 2
+): Promise<AiCompletion> {
+  debug('Requesting completion for prompt:', prompt);
+  const response = await client.chat.completions.create({
+    model,
+    messages: [{ role: 'user', content: prompt }],
+    temperature: 0.3,
+    response_format: { type: 'json_object' }
+  });
+  const content = response.choices[0]?.message?.content ?? '';
+
+  try {
+    return JSON.parse(content) as Record<string, string | undefined>;
+  } catch {
+    debug('Failed to parse JSON response:', content);
+    if (retryCount > 0) {
+      debug('Retrying, remaining attempts:', retryCount);
+      return getCompletion(client, prompt, model, retryCount - 1);
+    }
+
+    return undefined;
   }
+}
 
-  if (forcedProvider === 'lmstudio') {
-    const provider = new LmStudioProvider(url ?? DEFAULT_LMSTUDIO_URL);
-    console.info(`Using AI provider: lmstudio (${provider.baseUrl})`);
-    const ok = await provider.check(model);
-    return ok ? provider : undefined;
-  }
-};
+export async function checkAi(config: AiConfig): Promise<OpenAI | undefined> {
+  const client = createAiClient(config);
 
-const chooseProvider = async ({ model }: { model: string }) => {
-  const [ollamaResult, lmStudioResult] = await Promise.allSettled([
-    probeOllama(DEFAULT_OLLAMA_URL, model),
-    probeLmStudio(DEFAULT_LMSTUDIO_URL, model)
-  ]);
-  debugDetect('Probing Ollama and LM Studio in parallel');
-  const ollama: Probe = ollamaResult.status === 'fulfilled' ? ollamaResult.value : { up: false, hasModel: false };
-  const lmStudio: Probe = lmStudioResult.status === 'fulfilled' ? lmStudioResult.value : { up: false, hasModel: false };
-  debugDetect('Probe results — ollama:', ollama, 'lmstudio:', lmStudio);
-
-  let pickLmStudio: boolean;
-  if (ollama.up && !lmStudio.up) {
-    pickLmStudio = false;
-  } else if (lmStudio.up && !ollama.up) {
-    pickLmStudio = true;
-  } else if (lmStudio.hasModel && !ollama.hasModel) {
-    pickLmStudio = true;
-  } else {
-    pickLmStudio = false;
-  }
-
-  return {
-    pickLmStudio,
-    ollama,
-    lmStudio
-  };
-};
-
-export async function detectProvider(input: DetectInput): Promise<AiProvider | undefined> {
-  const { model, forcedProvider, url } = input;
-
-  if (forcedProvider) {
-    debugDetect(`Forced provider specified: ${forcedProvider}`);
-    await detectOllamaOrLmStudio(url ?? '', model, forcedProvider);
-  }
-
-  if (url) {
-    const provider = new OllamaProvider(url);
-    console.info(`Using AI provider: ollama (${provider.baseUrl})`);
-    const ok = await provider.check(model);
-    return ok ? provider : undefined;
-  }
-
-  const { pickLmStudio, ollama, lmStudio } = await chooseProvider({ model });
-
-  if (!ollama.up && !lmStudio.up) {
+  let models: string[];
+  try {
+    const list = await client.models.list();
+    models = list.data.map((m) => m.id);
+    debug('AI provider reachable at', config.url, '— available models:', models);
+  } catch (error) {
+    debug('AI provider unreachable:', error);
     console.error(
-      'No local AI provider detected. Install one of:\n' +
-        '  - Ollama: https://ollama.com/download\n' +
-        '  - LM Studio: https://lmstudio.ai/download'
+      `Could not reach an AI provider at ${config.url}.\n` +
+        `Make sure a local provider is running (e.g. Ollama: https://ollama.com/download, ` +
+        `LM Studio: https://lmstudio.ai/download), or point to another OpenAI-compatible endpoint with --ai-url.`
     );
     return undefined;
   }
 
-  if (pickLmStudio) {
-    const provider = new LmStudioProvider(DEFAULT_LMSTUDIO_URL);
-    console.info(`Using AI provider: lmstudio (${provider.baseUrl})`);
-    const result = await provider.checkDetail(model);
-    if (result.ok) return provider;
-
-    if (ollama.up) {
-      const reason =
-        result.reason === 'down' ? 'LM Studio became unreachable' : `model "${model}" is not loaded in LM Studio`;
-      console.warn(`Falling back to Ollama: ${reason}.`);
-      const fallback = new OllamaProvider(DEFAULT_OLLAMA_URL);
-      console.info(`Using AI provider: ollama (${fallback.baseUrl})`);
-      const fallbackOk = await fallback.check(model);
-      return fallbackOk ? fallback : undefined;
-    }
-
-    if (result.reason === 'down') {
-      console.error(
-        `LM Studio is not running, but --ai option is enabled.\nDownload it from https://lmstudio.ai/download and start the local server.`
-      );
-    } else {
-      console.error(
-        `Model "${model}" is not loaded in LM Studio.\nOpen the app and load the model (LM Studio has no CLI auto-pull).`
-      );
-    }
-
+  if (models.length > 0 && !models.includes(config.model) && !(await ensureModel(config))) {
     return undefined;
   }
 
-  const provider = new OllamaProvider(DEFAULT_OLLAMA_URL);
-  console.info(`Using AI provider: ollama (${provider.baseUrl})`);
-  const ok = await provider.check(model);
-  return ok ? provider : undefined;
+  return client;
+}
+
+// Only Ollama exposes a local CLI to pull models on demand; for any other provider the model
+// must already be available server-side, so we just warn and let the request proceed.
+async function ensureModel(config: AiConfig): Promise<boolean> {
+  if (!isLocalOllama(config.url)) {
+    console.warn(
+      `Model "${config.model}" is not listed by the AI provider. Continuing anyway; the request may fail if it isn't available.`
+    );
+    return true;
+  }
+
+  const confirm = await askForConfirmation(
+    `Model "${config.model}" not found. Do you want to download it with Ollama?`
+  );
+  if (!confirm) {
+    console.error(
+      `Model "${config.model}" is not available.\nPlease run "ollama pull ${config.model}" to download it.`
+    );
+    return false;
+  }
+
+  try {
+    console.info(`Downloading model "${config.model}"...`);
+    runCommandSync(`ollama pull ${config.model}`);
+    return true;
+  } catch (error: any) {
+    console.error(`Failed to download model "${config.model}".\n${error.message}`);
+    return false;
+  }
+}
+
+function isLocalOllama(url: string): boolean {
+  try {
+    const { hostname, port } = new URL(url);
+    return (hostname === 'localhost' || hostname === '127.0.0.1') && port === '11434';
+  } catch {
+    return false;
+  }
 }
 
 export function runCommandSync(command: string) {
