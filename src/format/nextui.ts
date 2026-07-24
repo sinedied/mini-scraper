@@ -39,10 +39,15 @@ export async function exportArtwork(
   return true;
 }
 
-export async function cleanupArtwork(targetPath: string, _romFolders: string[], _options: Options) {
-  const mediaFolders = await glob([`**/${mediaFolder}`], { onlyDirectories: true, cwd: targetPath });
-  await Promise.all(mediaFolders.map(async (mediaFolder) => fs.rm(mediaFolder, { recursive: true })));
-  console.info(`Removed ${mediaFolders.length} ${mediaFolder} folders`);
+export async function cleanupArtwork(targetPath: string, romFolders: string[], _options: Options) {
+  let removed = 0;
+  for (const romFolder of romFolders) {
+    const folders = await glob([`${romFolder}/**/${mediaFolder}`], { onlyDirectories: true, cwd: targetPath });
+    await Promise.all(folders.map(async (folder) => fs.rm(path.join(targetPath, folder), { recursive: true })));
+    removed += folders.length;
+  }
+
+  console.info(`Removed ${removed} ${mediaFolder} folders`);
 }
 
 const nextui = {
