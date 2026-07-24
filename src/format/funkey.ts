@@ -26,7 +26,7 @@ export async function exportArtwork(
   if (artTypes.art2 && (art1Url ?? art2Url)) {
     debug(`Found art URL(s): "${art1Url}" / "${art2Url}"`);
     await composeImageTo(art1Url, art2Url, artPath, { width: options.width, height: options.height });
-  } else if art1Url) {
+  } else if (art1Url) {
     debug(`Found art URL: "${art1Url}"`);
     await resizeImageTo(art1Url, artPath, { width: options.width, height: options.height });
   } else {
