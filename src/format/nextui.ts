@@ -42,8 +42,11 @@ export async function exportArtwork(
 export async function cleanupArtwork(targetPath: string, romFolders: string[], _options: Options) {
   let removed = 0;
   for (const romFolder of romFolders) {
-    const folders = await glob([`${romFolder}/**/${mediaFolder}`], { onlyDirectories: true, cwd: targetPath });
-    await Promise.all(folders.map(async (folder) => fs.rm(path.join(targetPath, folder), { recursive: true })));
+    // Use the ROM folder as the glob's cwd (a real path) rather than interpolating its name
+    // into the pattern, so names with glob-special characters (e.g. "Game Boy (GB)") still match.
+    const romPath = path.join(targetPath, romFolder);
+    const folders = await glob([`**/${mediaFolder}`], { onlyDirectories: true, cwd: romPath });
+    await Promise.all(folders.map(async (folder) => fs.rm(path.join(romPath, folder), { recursive: true })));
     removed += folders.length;
   }
 
