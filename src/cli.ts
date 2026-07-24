@@ -8,7 +8,7 @@ import glob from 'fast-glob';
 import updateNotifier from 'update-notifier';
 import { isRomFolder, scrapeFolder } from './libretro.js';
 import { type Options } from './options.js';
-import { checkOllama } from './ollama.js';
+import { checkAi, DEFAULT_AI_URL, DEFAULT_AI_KEY } from './ai.js';
 import { stats } from './stats.js';
 import { getOutputFormat } from './format/format.js';
 
@@ -33,7 +33,9 @@ export async function run(args: string[] = process.argv) {
     .option('-t, --type <type>', 'Art type (boxart, snap, title, box+snap, box+title)', 'boxart')
     .option('-o, --output <format>', 'Artwork format (minui, nextui, muos, anbernic)', 'minui')
     .option('-a, --ai', 'Use AI for advanced matching', false)
-    .option('-m, --ai-model <name>', 'Ollama model to use for AI matching', 'gemma2:2b')
+    .option('-m, --ai-model <name>', 'AI model to use for matching', 'gemma2:2b')
+    .option('--ai-url <url>', 'Base URL of the OpenAI-compatible AI provider', DEFAULT_AI_URL)
+    .option('--ai-key <key>', 'API key for the AI provider (or set OPENAI_API_KEY)')
     .option('-r, --regions <regions>', 'Preferred regions to use for AI matching', 'World,Europe,USA,Japan')
     .option('-f, --force', 'Force scraping over existing images')
     .option('--cleanup', 'Removes all scraped images in target folder')
@@ -72,11 +74,17 @@ export async function run(args: string[] = process.argv) {
       }
 
       if (options.ai) {
-        const ollama = await checkOllama(options.aiModel);
-        if (!ollama) {
+        const client = await checkAi({
+          url: options.aiUrl,
+          apiKey: options.aiKey ?? process.env.OPENAI_API_KEY ?? DEFAULT_AI_KEY,
+          model: options.aiModel
+        });
+        if (!client) {
           process.exitCode = 1;
           return;
         }
+
+        options.aiClient = client;
       }
 
       for (const folder of romFolders) {
