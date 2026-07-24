@@ -48,7 +48,7 @@ When running the scraper, you can pass the following options:
 - `-w, --width <size>`: Max width of the image (default: 300)
 - `-h, --height <size>`: Max height of the image
 - `-t, --type <type>`: Type of image to scrape (can be `boxart`, `snap`, `title`, `box+snap`, `box+title`) (default: `boxart`)
-- `-o, --output <format>`: Artwork format (can be (`minui`, `nextui`, `muos`, `anbernic`) (default: `minui`)
+- `-o, --output <format>`: Artwork format (can be (`minui`, `nextui`, `muos`, `anbernic`, `funkey`) (default: `minui`)
 - `-a, --ai`: Use AI for advanced matching (default: false)
 - `-m, --ai-model <name>`: AI model to use for matching (default: `gemma2:2b`)
 - `--ai-url <url>`: Base URL of the OpenAI-compatible AI provider (default: `http://localhost:11434/v1`)
