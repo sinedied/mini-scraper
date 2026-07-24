@@ -5,7 +5,7 @@ export * from './image.js';
 export * from './libretro.js';
 export * from './machines.js';
 export * from './matcher.js';
-export * from './ollama.js';
+export * from './ai.js';
 export * from './options.js';
 export * from './stats.js';
 export * from './format/format.js';

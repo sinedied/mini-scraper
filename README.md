@@ -16,12 +16,12 @@ Artwork scraper for [MinUI](https://github.com/shauninman/MinUI), [NextUI](https
 **Features:**
 - Scrapes boxart for your ROMs, in a compatible format with multiple frontends/OSes
 - No account needed, uses [libretro thumbnails](https://github.com/libretro-thumbnails/libretro-thumbnails)
-- Optionally uses local AI with [Ollama](https://ollama.com/) for better boxart matching
+- Optionally uses local AI (via [Ollama](https://ollama.com/) or any OpenAI-compatible API) for better boxart matching
 - No configuration needed
 
 ## Intallation
 
-Requires [Node.js](https://nodejs.org/), and optionally [Ollama](https://ollama.com/) for AI matching. You need to install these to be able to use the scraper. If you don't want to install these, you also have the option to use [Docker](#running-with-docker).
+Requires [Node.js](https://nodejs.org/), and optionally [Ollama](https://ollama.com/) (or any other OpenAI-compatible AI provider) for AI matching. You need to install these to be able to use the scraper. If you don't want to install these, you also have the option to use [Docker](#running-with-docker).
 
 This tool works with a Command Line Interface (CLI), and need to be installed and run from a terminal application.
 
@@ -50,7 +50,9 @@ When running the scraper, you can pass the following options:
 - `-t, --type <type>`: Type of image to scrape (can be `boxart`, `snap`, `title`, `box+snap`, `box+title`) (default: `boxart`)
 - `-o, --output <format>`: Artwork format (can be (`minui`, `nextui`, `muos`, `anbernic`) (default: `minui`)
 - `-a, --ai`: Use AI for advanced matching (default: false)
-- `-m, --ai-model <name>`: Ollama model to use for AI matching (default: `gemma2:2b`)
+- `-m, --ai-model <name>`: AI model to use for matching (default: `gemma2:2b`)
+- `--ai-url <url>`: Base URL of the OpenAI-compatible AI provider (default: `http://localhost:11434/v1`)
+- `--ai-key <key>`: API key for the AI provider, or set the `OPENAI_API_KEY` environment variable
 - `-r, --regions <regions>`: Preferred regions to use for AI matching (default: `World,Europe,USA,Japan`)
 - `-f, --force`: Force scraping over existing images
 - `--cleanup`: Removes all scraped images in target folder
@@ -59,6 +61,26 @@ When running the scraper, you can pass the following options:
 
 > [!TIP]
 > Max width must be adjusted depending of the device and output format, the default works well for Trimui Brick. For 640x480 devices, try with `--width 200`.
+
+## AI matching
+
+When `--ai` is enabled, the scraper talks to any **OpenAI-compatible** chat completions API, so you can use whatever runner you like.
+
+- By default it targets a local [Ollama](https://ollama.com/) instance at `http://localhost:11434/v1`. If the requested model isn't pulled yet, the scraper offers to download it for you.
+- Point `--ai-url` at any other OpenAI-compatible endpoint to use a different runner, for example [LM Studio](https://lmstudio.ai/) (`http://localhost:1234/v1`), a remote server, or the OpenAI API (`https://api.openai.com/v1`). With non-Ollama providers the model must already be available server-side.
+- For providers that require authentication (such as the OpenAI API), pass `--ai-key` or set the `OPENAI_API_KEY` environment variable. Local providers usually ignore the key.
+
+```bash
+# Default: local Ollama
+mscraper myroms --ai
+
+# LM Studio (load the model in the app first)
+mscraper myroms --ai --ai-url http://localhost:1234/v1
+
+# OpenAI API
+mscraper myroms --ai --ai-url https://api.openai.com/v1 --ai-model gpt-4o-mini --ai-key sk-...
+```
+
 
 ## Example
 

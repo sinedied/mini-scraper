@@ -1,3 +1,5 @@
+import type OpenAI from 'openai';
+
 export enum ArtTypeOption {
   Boxart = 'boxart',
   Snap = 'snap',
@@ -13,6 +15,9 @@ export type Options = {
   force?: boolean;
   ai?: boolean;
   aiModel: string;
+  aiUrl: string;
+  aiKey?: string;
+  aiClient?: OpenAI;
   regions: string;
   output: string;
   cleanup?: boolean;
