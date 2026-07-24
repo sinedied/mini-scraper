@@ -50,7 +50,10 @@ export async function getOutputFormat(options: Options): Promise<OutputFormat> {
       return muos.default;
     }
 
-    case Format.Anbernic: {
+    // Onion (OnionOS) uses the exact same `Imgs/<romname>.png` layout as Anbernic,
+    // so it's an alias of the Anbernic format.
+    case Format.Anbernic:
+    case Format.Onion: {
       const anbernic = await import('./anbernic.js');
       return anbernic.default;
     }
@@ -58,11 +61,6 @@ export async function getOutputFormat(options: Options): Promise<OutputFormat> {
     case Format.Funkey: {
       const funkey = await import('./funkey.js');
       return funkey.default;
-    }
-
-    case Format.Onion: {
-      const onion = await import('./onion.js');
-      return onion.default;
     }
 
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
