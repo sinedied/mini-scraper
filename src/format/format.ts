@@ -6,7 +6,8 @@ export enum Format {
   NextUI = 'nextui',
   MuOS = 'muos',
   Anbernic = 'anbernic',
-  Funkey = 'funkey'
+  Funkey = 'funkey',
+  Onion = 'onion'
 }
 
 export type SeparateArtworksFunction = (options: Options) => Promise<boolean>;
@@ -49,7 +50,10 @@ export async function getOutputFormat(options: Options): Promise<OutputFormat> {
       return muos.default;
     }
 
-    case Format.Anbernic: {
+    // Onion (OnionOS) uses the exact same `Imgs/<romname>.png` layout as Anbernic,
+    // so it's an alias of the Anbernic format.
+    case Format.Anbernic:
+    case Format.Onion: {
       const anbernic = await import('./anbernic.js');
       return anbernic.default;
     }
