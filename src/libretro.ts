@@ -14,7 +14,7 @@ const debug = createDebug('libretro');
 
 export type MachineCache = Record<string, Partial<Record<ArtType, string[]>>>;
 
-const baseUrl = 'https://thumbnails.libretro.com/';
+const defaultBaseUrl = 'https://thumbnails.libretro.com/';
 const machineCache: MachineCache = {};
 
 export function getMachine(file: string, isFolder = false) {
@@ -129,6 +129,7 @@ export async function findArtUrl(
   type: ArtType = ArtType.Boxart,
   fallback = true
 ): Promise<string | undefined> {
+  const baseUrl = process.env.MSCRAPER_THUMBNAIL_URL ?? defaultBaseUrl;
   let arts = machineCache[machine]?.[type];
   if (!arts) {
     debug(`Fetching arts list for "${machine}" (${type})`);
