@@ -18,7 +18,13 @@
     "build:watch": "tsc -w --sourceMap",
     "lint": "xo",
     "lint:fix": "xo --fix",
-    "test": "xo && npm run start test",
+    "test": "npm run lint && npm run build && vitest run",
+    "test:unit": "vitest run tests/unit",
+    "test:smoke": "npm run build && vitest run tests/smoke",
+    "test:ai": "npm run build && vitest run tests/smoke/ai.test.ts",
+    "test:watch": "vitest",
+    "test:live": "npm run start test",
+    "test:live:ai": "npm run start -- test --ai",
     "clean": "rm -rf lib *.tgz",
     "release:check": "semantic-release --dry-run"
   },
@@ -42,27 +48,30 @@
   },
   "license": "MIT",
   "engines": {
-    "node": ">=20.0.0",
+    "node": ">=22.14.0",
     "npm": ">=10.0.0"
   },
   "dependencies": {
-    "commander": "^13.1.0",
-    "debug": "^4.4.0",
+    "commander": "^15.0.0",
+    "debug": "^4.4.3",
     "fast-glob": "^3.3.3",
-    "fast-png": "^6.3.0",
+    "fast-png": "^8.0.0",
     "fastest-levenshtein": "^1.0.16",
+    "jimp": "^1.6.1",
+    "openai": "^6.48.0",
     "string-comparison": "^1.3.0",
-    "jimp": "^1.6.0",
-    "openai": "^6.47.0",
     "update-notifier": "^7.3.1"
   },
   "devDependencies": {
-    "@types/debug": "^4.1.12",
+    "@types/debug": "^4.1.13",
+    "@types/node": "^22.20.1",
     "@types/update-notifier": "^6.0.8",
-    "semantic-release": "^24.2.3",
-    "semantic-release-npm-github": "^5.0.0",
-    "typescript": "^5.8.2",
-    "xo": "^0.60.0"
+    "prettier": "^3.9.5",
+    "semantic-release": "^25.0.7",
+    "semantic-release-npm-github": "^6.0.0",
+    "typescript": "6.0.3",
+    "vitest": "^4.1.10",
+    "xo": "^4.0.0"
   },
   "release": {
     "extends": "semantic-release-npm-github",
@@ -70,28 +79,33 @@
   },
   "prettier": {
     "trailingComma": "none",
-    "bracketSpacing": true
+    "bracketSpacing": true,
+    "singleQuote": true
   },
-  "xo": {
-    "space": true,
-    "prettier": true,
-    "envs": [
-      "node"
-    ],
-    "rules": {
-      "no-await-in-loop": "off",
-      "@typescript-eslint/naming-convention": "off",
-      "@typescript-eslint/no-unsafe-assignment": "off",
-      "@typescript-eslint/no-unsafe-argument": "off",
-      "unicorn/no-process-exit": "off",
-      "unicorn/prevent-abbreviations": "off",
-      "unicorn/no-array-callback-reference": "off",
-      "max-params": [
-        "warn",
-        5
+  "xo": [
+    {
+      "ignores": [
+        "**/*.md"
       ]
+    },
+    {
+      "space": true,
+      "prettier": "compat",
+      "rules": {
+        "no-await-in-loop": "off",
+        "@typescript-eslint/naming-convention": "off",
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/no-unsafe-argument": "off",
+        "unicorn/no-process-exit": "off",
+        "unicorn/prevent-abbreviations": "off",
+        "unicorn/no-array-callback-reference": "off",
+        "max-params": [
+          "warn",
+          5
+        ]
+      }
     }
-  },
+  ],
   "files": [
     "bin",
     "lib"
