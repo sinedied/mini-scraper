@@ -77,11 +77,6 @@
     "extends": "semantic-release-npm-github",
     "branches": "main"
   },
-  "prettier": {
-    "trailingComma": "none",
-    "bracketSpacing": true,
-    "singleQuote": true
-  },
   "xo": [
     {
       "ignores": [
@@ -90,7 +85,7 @@
     },
     {
       "space": true,
-      "prettier": "compat",
+      "prettier": true,
       "rules": {
         "no-await-in-loop": "off",
         "@typescript-eslint/naming-convention": "off",
@@ -112,7 +107,15 @@
     },
     {
       "rules": {
-        "curly": "off"
+        "curly": "off",
+        "prettier/prettier": [
+          "error",
+          {
+            "trailingComma": "none",
+            "bracketSpacing": true,
+            "singleQuote": true
+          }
+        ]
       }
     }
   ],
