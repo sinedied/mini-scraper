@@ -1,3 +1,29 @@
+# [2.0.0](https://github.com/sinedied/mini-scraper/compare/1.5.1...2.0.0) (2026-07-31)
+
+
+* feat!: require Node.js 22 and modernize dependencies ([9675b43](https://github.com/sinedied/mini-scraper/commit/9675b435c8dbb5e6ba37a8cea7a71c2a3e55ac08))
+
+
+### Bug Fixes
+
+* add missed z64 extension for scrape Nintendo 64 ([472c1a1](https://github.com/sinedied/mini-scraper/commit/472c1a16cbb467470bd96ea61d19fa04b7e15433))
+* **cleanup:** match ROM folders with glob-special characters ([#27](https://github.com/sinedied/mini-scraper/issues/27)) ([99cb841](https://github.com/sinedied/mini-scraper/commit/99cb841fac40c7de1b1c91ef9f50f397c130186b))
+* **cleanup:** scope artwork cleanup to the selected ROM folders ([3a0da05](https://github.com/sinedied/mini-scraper/commit/3a0da05cf5921a21c4ad6a423117c346e4cd71c3))
+
+
+### Features
+
+* add support for any OpenAI-compatible provider ([#23](https://github.com/sinedied/mini-scraper/issues/23)) ([6f63509](https://github.com/sinedied/mini-scraper/commit/6f635097edb6fe8a1c29b0f236e911fc341b36e9))
+* add support for funkeyOS ([#18](https://github.com/sinedied/mini-scraper/issues/18)) ([5c12a9e](https://github.com/sinedied/mini-scraper/commit/5c12a9e25a1f8e08366415b652ee10b024b60fac))
+* add support for Onion (OnionOS) artwork format ([#16](https://github.com/sinedied/mini-scraper/issues/16)) ([413f99d](https://github.com/sinedied/mini-scraper/commit/413f99d59cbc62c210c360e3235c5070f2462dc7))
+
+
+### BREAKING CHANGES
+
+* Node.js 20 is no longer supported; Node.js 22.14 or newer is required.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+
 ## [1.5.1](https://github.com/sinedied/mini-scraper/compare/1.5.0...1.5.1) (2025-04-05)
 
 
