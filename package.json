@@ -117,6 +117,18 @@
           }
         ]
       }
+    },
+    {
+      "files": [
+        "tests/**/*.ts",
+        "vitest.config.ts"
+      ],
+      "languageOptions": {
+        "parserOptions": {
+          "projectService": false,
+          "project": "./tsconfig.test.json"
+        }
+      }
     }
   ],
   "files": [
