@@ -34,7 +34,7 @@ describe('AI-enabled CLI smoke test', () => {
     const result = await runCli(
       [directory, '--ai', '--ai-url', service.aiUrl, '--ai-key', 'secret-key', '--ai-model', 'test-model'],
       {
-        MSCRAPER_THUMBNAIL_URL: service.baseUrl
+        MSCRAPER_THUMBNAIL_URL: `${service.baseUrl}/`
       }
     );
 

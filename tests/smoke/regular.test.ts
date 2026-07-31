@@ -16,6 +16,7 @@ const originalWorkingDirectory = process.cwd();
 
 afterEach(async () => {
   process.chdir(originalWorkingDirectory);
+  delete process.env.MSCRAPER_THUMBNAIL_URL;
   const pendingCleanups = [...cleanups];
   cleanups.length = 0;
   await Promise.all(pendingCleanups.map(async (cleanup) => cleanup()));
@@ -39,13 +40,9 @@ describe('regular scrape smoke test', () => {
       force: true
     });
     process.chdir(directory);
+    process.env.MSCRAPER_THUMBNAIL_URL = `${service.baseUrl}/`;
 
-    await scrapeFolder(
-      'GBC',
-      createOptions({
-        thumbnailUrl: service.baseUrl
-      })
-    );
+    await scrapeFolder('GBC', createOptions());
 
     await expect(
       fs.access(path.join(directory, 'GBC', '.res', 'Wario Land 3 (World) (En,Ja).zip.png'))
@@ -84,13 +81,9 @@ describe('regular scrape smoke test', () => {
       force: true
     });
     process.chdir(directory);
+    process.env.MSCRAPER_THUMBNAIL_URL = `${service.baseUrl}/`;
 
-    await scrapeFolder(
-      'PS',
-      createOptions({
-        thumbnailUrl: service.baseUrl
-      })
-    );
+    await scrapeFolder('PS', createOptions());
 
     await expect(
       fs.access(path.join(directory, 'PS', '.res', 'Final Fantasy VII (Europe).m3u.png'))
@@ -119,13 +112,14 @@ describe('regular scrape smoke test', () => {
     await fs.mkdir(path.dirname(artPath), { recursive: true });
     await fs.writeFile(artPath, 'existing');
     process.chdir(directory);
+    process.env.MSCRAPER_THUMBNAIL_URL = `${service.baseUrl}/`;
 
-    await scrapeFolder('GBC', createOptions({ thumbnailUrl: service.baseUrl }));
+    await scrapeFolder('GBC', createOptions());
     expect(stats.skipped).toBe(1);
     await expect(fs.readFile(artPath, 'utf8')).resolves.toBe('existing');
 
     resetStats();
-    await scrapeFolder('GBC', createOptions({ thumbnailUrl: service.baseUrl, force: true }));
+    await scrapeFolder('GBC', createOptions({ force: true }));
     expect(stats.matches.perfect).toBe(1);
     await expect(fs.readFile(artPath)).resolves.not.toEqual(Buffer.from('existing'));
   });
