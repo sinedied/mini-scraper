@@ -96,6 +96,11 @@
         "@typescript-eslint/naming-convention": "off",
         "@typescript-eslint/no-unsafe-assignment": "off",
         "@typescript-eslint/no-unsafe-argument": "off",
+        "@typescript-eslint/strict-boolean-expressions": "off",
+        "regexp/no-unused-capturing-group": "off",
+        "regexp/prefer-named-capture-group": "off",
+        "unicorn/consistent-boolean-name": "off",
+        "unicorn/name-replacements": "off",
         "unicorn/no-process-exit": "off",
         "unicorn/prevent-abbreviations": "off",
         "unicorn/no-array-callback-reference": "off",
@@ -103,6 +108,11 @@
           "warn",
           5
         ]
+      }
+    },
+    {
+      "rules": {
+        "curly": "off"
       }
     }
   ],
