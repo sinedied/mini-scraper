@@ -1,4 +1,5 @@
 import { mkdir } from 'node:fs/promises';
+import { Buffer } from 'node:buffer';
 import path from 'node:path';
 import { Jimp } from 'jimp';
 import { decode, encode } from 'fast-png';
@@ -64,12 +65,15 @@ export async function composeImageTo(
       const img2Width = image2.bitmap.width >= image2.bitmap.height ? width - margin : undefined;
       const img2Height = image2.bitmap.width < image2.bitmap.height ? height - margin : undefined;
       image2.resize({ w: img2Width!, h: img2Height });
-      image.composite(image2, 0, (height - image2.bitmap.height) / 2 - margin);
+      const image2Center = (height - image2.bitmap.height) / 2;
+      image.composite(image2, 0, image2Center - margin);
     }
 
     if (image1) {
-      const img1Width = image1.bitmap.width >= image1.bitmap.height ? width / 2 - margin : undefined;
-      const img1Height = image1.bitmap.width < image1.bitmap.height ? height / 2 - margin : undefined;
+      const halfWidth = width / 2;
+      const halfHeight = height / 2;
+      const img1Width = image1.bitmap.width >= image1.bitmap.height ? halfWidth - margin : undefined;
+      const img1Height = image1.bitmap.width < image1.bitmap.height ? halfHeight - margin : undefined;
       image1.resize({ w: img1Width!, h: img1Height });
       image.composite(image1, width - image1.bitmap.width, height - image1.bitmap.height);
     }

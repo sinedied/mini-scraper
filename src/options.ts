@@ -21,5 +21,4 @@ export type Options = {
   regions: string;
   output: string;
   cleanup?: boolean;
-  thumbnailUrl?: string;
 };
