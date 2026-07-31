@@ -192,7 +192,7 @@ async function updateIniFiles(rootPath: string, options: Options) {
       if (await pathExists(iniFile)) {
         let content = await fs.readFile(iniFile, 'utf8');
         if (content.includes('CONTENT_WIDTH')) {
-          content = content.replace(/^CONTENT_WIDTH=\d+$/m, `CONTENT_WIDTH=${options.width}`);
+          content = content.replace(/^CONTENT_WIDTH=\d+$/mv, () => `CONTENT_WIDTH=${options.width}`);
           console.info(`Updated theme override: "${iniFile}" with CONTENT_WIDTH=${options.width}`);
           await fs.writeFile(iniFile, content);
         } else {

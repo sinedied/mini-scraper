@@ -2,30 +2,34 @@ import process from 'node:process';
 import fs from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { join, dirname, basename } from 'node:path';
-import { program } from 'commander';
+import { Command } from 'commander';
 import debug from 'debug';
 import glob from 'fast-glob';
 import updateNotifier from 'update-notifier';
 import { isRomFolder, scrapeFolder } from './libretro.js';
 import { type Options } from './options.js';
 import { checkAi, DEFAULT_AI_URL, DEFAULT_AI_KEY } from './ai.js';
-import { stats } from './stats.js';
+import { resetStats, stats } from './stats.js';
 import { getOutputFormat } from './format/format.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export async function run(args: string[] = process.argv) {
   const file = await fs.readFile(join(__dirname, '..', 'package.json'), 'utf8');
-  const packageJson = JSON.parse(file);
+  const packageJson: unknown = JSON.parse(file);
+  if (!isPackageMetadata(packageJson)) {
+    throw new TypeError('Invalid package metadata');
+  }
 
   updateNotifier({ pkg: packageJson }).notify();
+  resetStats();
 
   if (args.includes('--verbose')) {
     debug.enable('*');
   }
 
-  program
-    .name(basename(process.argv[1]))
+  const command = new Command()
+    .name(basename(args[1] ?? 'mscraper'))
     .description(packageJson.description)
     .argument('<rompath>', 'Path to the folder containing the ROMs')
     .option('-w, --width <size>', 'Max width of the image', Number.parseFloat, 300)
@@ -104,5 +108,18 @@ export async function run(args: string[] = process.argv) {
       if (stats.skipped) console.info(`- ${stats.skipped} existing`);
     });
 
-  program.parse(args);
+  await command.parseAsync(args);
+}
+
+function isPackageMetadata(value: unknown): value is { name: string; description: string; version: string } {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'name' in value &&
+    typeof value.name === 'string' &&
+    'description' in value &&
+    typeof value.description === 'string' &&
+    'version' in value &&
+    typeof value.version === 'string'
+  );
 }
