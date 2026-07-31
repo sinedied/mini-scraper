@@ -63,8 +63,8 @@ export async function checkAi(config: AiConfig): Promise<OpenAI | undefined> {
     debug('AI provider unreachable:', error);
     console.error(
       `Could not reach an AI provider at ${config.url}.\n` +
-        `Make sure a local provider is running (e.g. Ollama: https://ollama.com/download, ` +
-        `LM Studio: https://lmstudio.ai/download), or point to another OpenAI-compatible endpoint with --ai-url.`
+        'Make sure a local provider is running (e.g. Ollama: https://ollama.com/download, ' +
+        'LM Studio: https://lmstudio.ai/download), or point to another OpenAI-compatible endpoint with --ai-url.'
     );
     return undefined;
   }
