@@ -24,7 +24,7 @@ jobs:
     - name: Run deterministic test suite
       run: npm test
     - name: Run live fixture scrape
-      run: npm run test:fixtures:live
+      run: npm run test:live
 
   build_all:
     if: always()
