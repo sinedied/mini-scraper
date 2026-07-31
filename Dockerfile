@@ -13,7 +13,7 @@ WORKDIR /app
 COPY . .
 
 # Install dependencies, build and install the CLI
-RUN npm install && npm run build && npm install -g .
+RUN npm ci && npm run build && npm install -g .
 
 # Copy the entrypoint script
 COPY scripts/entrypoint.sh /entrypoint.sh

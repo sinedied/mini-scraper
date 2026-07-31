@@ -19,11 +19,13 @@ Artwork scraper for [MinUI](https://github.com/shauninman/MinUI), [NextUI](https
 - Optionally uses local AI (via [Ollama](https://ollama.com/) or any OpenAI-compatible API) for better boxart matching
 - No configuration needed
 
-## Intallation
+## Installation
 
-Requires [Node.js](https://nodejs.org/), and optionally [Ollama](https://ollama.com/) (or any other OpenAI-compatible AI provider) for AI matching. You need to install these to be able to use the scraper. If you don't want to install these, you also have the option to use [Docker](#running-with-docker).
+Requires [Node.js >22.14](https://nodejs.org/), and optionally [Ollama](https://ollama.com/) (or any other OpenAI-compatible AI provider) for AI matching. If you don't want to install these locally, you can use [Docker](#running-with-docker).
 
-This tool works with a Command Line Interface (CLI), and need to be installed and run from a terminal application.
+
+
+This tool uses a Command Line Interface (CLI) and must be installed and run from a terminal.
 
 Install the CLI globally by opening a terminal and running the following command:
 
@@ -114,7 +116,6 @@ Explanation:
 - `mini-scraper`: This is the name of the Docker image.
 - `/roms`: This is the directory inside the container where the ROMs are mounted.
 - `[options]`: Replace this with the command-line arguments to be passed to the scraper.
-
 
 ## Supported Systems
 
