@@ -32,7 +32,6 @@ jobs:
     - run: npx semantic-release
       if: success()
       env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        # Need owner/admin account to bypass branch protection
+        GITHUB_TOKEN: ${{ github.token }}
         GIT_COMMITTER_NAME: sinedied
         GIT_COMMITTER_EMAIL: noda@free.fr
