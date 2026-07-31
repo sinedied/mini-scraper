@@ -100,8 +100,10 @@ async function ensureModel(config: AiConfig): Promise<boolean> {
     console.info(`Downloading model "${config.model}"...`);
     runCommandSync(`ollama pull ${config.model}`);
     return true;
-  } catch (error: any) {
-    console.error(`Failed to download model "${config.model}".\n${error.message}`);
+  } catch (error: unknown) {
+    console.error(
+      `Failed to download model "${config.model}".\n${error instanceof Error ? error.message : String(error)}`
+    );
     return false;
   }
 }

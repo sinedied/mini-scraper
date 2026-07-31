@@ -19,10 +19,11 @@ const machineCache: MachineCache = {};
 
 export function getMachine(file: string, isFolder = false) {
   const extension = file.split('.').pop() ?? '';
-  const firstComponent = file.split(/\\|\//)[0];
-  const machine = Object.entries(machines).find(([_, { extensions, alias }]) => {
-    return (isFolder || extensions.includes(extension)) && alias.some((a) => firstComponent.includes(a));
-  });
+  const firstComponent = file.split(/\\|\//v, 1)[0];
+  const machine = Object.entries(machines).find(
+    ([_, { extensions, alias }]) =>
+      (isFolder || extensions.includes(extension)) && alias.some((a) => firstComponent.includes(a))
+  );
   return machine ? machine[0] : undefined;
 }
 
@@ -137,7 +138,7 @@ export async function findArtUrl(
     arts =
       text
         .match(/<a href="([^"]+)">/gv)
-        ?.map((a) => a.replace(/<a href="([^"]+)">/, '$1'))
+        ?.map((a) => a.replace(/<a href="([^"]+)">/v, '$1'))
         .map((a) => decodeURIComponent(a)) ?? [];
     machineCache[machine] ??= {};
     machineCache[machine][type] = arts;

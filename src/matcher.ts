@@ -36,7 +36,7 @@ export async function findBestMatchWithAi(
 ): Promise<string | undefined> {
   const prompt = `
 ## Candidates
-${candidates.map((c) => `${c}`).join('\n')}
+${candidates.join('\n')}
 
 ## Instructions
 Find the best matching image for the ROM name "${name}" in the listed candidates.
