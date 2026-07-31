@@ -4,6 +4,7 @@ import createDebug from 'debug';
 import { type Options } from './options.js';
 import { stats } from './stats.js';
 import { getCompletion } from './ai.js';
+import { stripMetadata } from './file.js';
 
 const debug = createDebug('matcher');
 
@@ -16,7 +17,7 @@ export async function findBestMatch(search: string, name: string, candidates: st
   }
 
   // Use Levenstein distance after removing (...) and [...] in the name
-  const strippedCandidates = candidates.map((c) => c.replaceAll(/(\(.*?\)|\[.*?])/g, '').trim());
+  const strippedCandidates = candidates.map((candidate) => stripMetadata(candidate));
   const best = closest(search, strippedCandidates);
   const bestIndex = strippedCandidates.indexOf(best);
   const bestMatch = candidates[bestIndex];
@@ -54,31 +55,34 @@ Answer with JSON using the following format:
 
   if (!options.aiClient) return undefined;
 
-  const response = await getCompletion(options.aiClient, prompt, options.aiModel);
-  debug('AI response:', response);
+  for (let retriesLeft = retries; retriesLeft >= 0; retriesLeft--) {
+    const response = await getCompletion(options.aiClient, prompt, options.aiModel);
+    debug('AI response:', response);
 
-  const bestMatch = response?.bestMatch;
-  if (!bestMatch) {
-    debug(`AI failed to find a match for "${name}" (searched: "${search}")`);
-    return undefined;
-  }
+    const bestMatch = response?.bestMatch;
+    if (typeof bestMatch !== 'string' || bestMatch.length === 0) {
+      debug(`AI failed to find a match for "${name}" (searched: "${search}")`);
+      return undefined;
+    }
 
-  if (!candidates.includes(bestMatch)) {
+    if (candidates.includes(bestMatch)) {
+      console.info(`AI match for "${name}" (searched: "${search}"): "${bestMatch}"`);
+      stats.matches.ai++;
+      return bestMatch;
+    }
+
     debug(`AI found a match for "${name}" (searched: "${search}"), but it's not a candidate: "${bestMatch}"`);
-    if (retries <= 0) return undefined;
-
-    debug(`Retrying AI match for "${name}" (Tries left: ${retries})`);
-    return findBestMatchWithAi(search, name, candidates, options, retries - 1);
+    if (retriesLeft > 0) {
+      debug(`Retrying AI match for "${name}" (Tries left: ${retriesLeft})`);
+    }
   }
 
-  console.info(`AI match for "${name}" (searched: "${search}"): "${bestMatch}"`);
-  stats.matches.ai++;
-  return bestMatch;
+  return undefined;
 }
 
 export async function findFuzzyMatches(search: string, candidates: string[], _options: Options) {
   // Remove (...) and [...] in candidates' name
-  const strippedCandidates = candidates.map((c) => c.replaceAll(/(\(.*?\)|\[.*?])/g, '').trim());
+  const strippedCandidates = candidates.map((candidate) => stripMetadata(candidate));
   const jaroMatches = new Set(
     strippedCandidates
       .map((c) => ({
@@ -86,7 +90,7 @@ export async function findFuzzyMatches(search: string, candidates: string[], _op
         similarity: stringComparison.jaroWinkler.similarity(search, c)
       }))
       .filter(({ similarity }) => similarity >= 0.85)
-      .sort((a, b) => b.similarity - a.similarity)
+      .toSorted((a, b) => b.similarity - a.similarity)
       .slice(0, 25)
       .map(({ c }) => c)
   );

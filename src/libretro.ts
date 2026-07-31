@@ -8,7 +8,7 @@ import { stats } from './stats.js';
 import { machines } from './machines.js';
 import { getOutputFormat } from './format/format.js';
 import { ArtType } from './art.js';
-import { pathExists, sanitizeName } from './file.js';
+import { pathExists, sanitizeName, stripMetadata } from './file.js';
 
 const debug = createDebug('libretro');
 
@@ -51,7 +51,7 @@ export async function scrapeFolder(folderPath: string, options: Options) {
       } else {
         // Check if it's a multi-disc, with "Rom Name (Disc 1).any" format,
         // with a "Rom Name.m3u" in the same folder
-        const m3uPath = filePath.replace(/ \(Disc \d+\).+$/, '') + '.m3u';
+        const m3uPath = filePath.replace(/ \(Disc \d+\).+$/v, '') + '.m3u';
         if (await pathExists(m3uPath)) {
           debug(`File is a multi-disc part, skipping: ${filePath}`);
           continue;
@@ -136,7 +136,7 @@ export async function findArtUrl(
     const text = await response.text();
     arts =
       text
-        .match(/<a href="([^"]+)">/g)
+        .match(/<a href="([^"]+)">/gv)
         ?.map((a) => a.replace(/<a href="([^"]+)">/, '$1'))
         .map((a) => decodeURIComponent(a)) ?? [];
     machineCache[machine] ??= {};
@@ -157,6 +157,10 @@ export async function findArtUrl(
     const matches = arts.filter((a) => a.includes(sanitizeName(name)));
     if (matches.length > 0) {
       const bestMatch = await findBestMatch(name, fileName, matches, options);
+      if (!bestMatch) {
+        return undefined;
+      }
+
       return `${baseUrl}${machine}/${type}/${bestMatch}`;
     }
 
@@ -164,7 +168,7 @@ export async function findArtUrl(
   };
 
   // Try searching after removing (...) and [...] in the name
-  let strippedName = fileName.replaceAll(/(\(.*?\)|\[.*?])/g, '').trim();
+  let strippedName = stripMetadata(fileName);
   let match = await findMatch(strippedName);
   if (match) return match;
 
@@ -172,6 +176,10 @@ export async function findArtUrl(
   const matches: string[] = await findFuzzyMatches(sanitizeName(strippedName), arts, options);
   if (matches.length > 0) {
     const bestMatch = await findBestMatch(strippedName, fileName, matches, options);
+    if (!bestMatch) {
+      return undefined;
+    }
+
     return `${baseUrl}${machine}/${type}/${bestMatch}`;
   }
 
@@ -181,12 +189,12 @@ export async function findArtUrl(
   if (match) return match;
 
   // Try searching after removing substitles using ': '
-  strippedName = strippedName.split(': ')[0].trim();
+  strippedName = strippedName.split(': ', 1)[0].trim();
   match = await findMatch(strippedName);
   if (match) return match;
 
   // Try searching after removing substitles using '- '
-  strippedName = strippedName.split('- ')[0].trim();
+  strippedName = strippedName.split('- ', 1)[0].trim();
   match = await findMatch(strippedName);
   if (match) return match;
 
